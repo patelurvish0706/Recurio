@@ -6,6 +6,14 @@ from flask import Flask, request, render_template_string
 import fitz  # PyMuPDF
 import requests
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+OCR_API_KEY = os.getenv("OCR_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
+
 app = Flask(__name__)
 
 # Prefer to simply Enter email and confirm mail, will get api in mail https://ocr.space/ocrapi/freekey#
