@@ -2,3 +2,4 @@ gunicorn
 flask
 PyMuPDF
 requests
+python-dotenv
