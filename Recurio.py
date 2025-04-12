@@ -8,10 +8,10 @@ import requests
 
 app = Flask(__name__)
 
-# Prefer to simply Enter email and confirm mail, will get api in mail https://ocr.space/ocrapi/freekey
-OCR_API_KEY = "YOUR_OCR_API_KEY"
+# Prefer to simply Enter email and confirm mail, will get api in mail https://ocr.space/ocrapi/freekey#
+# OCR_API_KEY = "YOUR_OCR_API_KEY"
 # Prefer to simply login on this site and click on *Create key* https://openrouter.ai/settings/keys
-OPENROUTER_API_KEY = "YOUR_OPENROUTER_API_KEY"
+# OPENROUTER_API_KEY = "YOUR_OPENROUTER_API_KEY"
 
 HTML_FORM = '''
 <!DOCTYPE html>
