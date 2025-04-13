@@ -5,7 +5,7 @@ import requests
 app = Flask(__name__)
 
 OCR_API_KEY= "K88197236988957"
-OPENROUTER_API_KEY= "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"
+OPENROUTER_API_KEY= "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"
 
 # Prefer to simply Enter email and confirm mail, will get api in mail https://ocr.space/ocrapi/freekey# 
 # Prefer to simply login on this site and click on *Create key* https://openrouter.ai/settings/keys
@@ -299,7 +299,8 @@ def call_openrouter(prompt):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://recurio.onrender.com",
+        # "HTTP-Referer": "https://recurio.onrender.com",
+        "HTTP-Referer": "localhost",
     }
 
     data = {
