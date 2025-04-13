@@ -302,6 +302,7 @@ def call_openrouter(prompt):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
+
     }
 
     data = {
@@ -313,7 +314,7 @@ def call_openrouter(prompt):
 
     response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
     if response.status_code != 200:
-        return f"<p>Error from OpenRouter: {response.status_code}</p>"
+        return f"<p>Error from OpenRouter: {response.status_code}<br>{response.text}</p>"
     result = response.json()
     return result["choices"][0]["message"]["content"]
 
