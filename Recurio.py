@@ -1,6 +1,9 @@
+import logging
 from flask import Flask, request, render_template_string
 import fitz  # PyMuPDF
 import requests
+from werkzeug.utils import secure_filename
+
 from dotenv import load_dotenv
 import os
 
@@ -10,6 +13,11 @@ load_dotenv()
 # Get API keys
 OCR_API_KEY = os.getenv("OCR_API_KEY")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -279,45 +287,63 @@ HTML_FORM = '''
 </html>
 '''
 
-
 def extract_text_from_pdf(file_stream):
-    text = ""
-    doc = fitz.open(stream=file_stream.read(), filetype="pdf")
-    for page in doc:
-        text += page.get_text()
-    return text
+    try:
+        logger.info("Extracting text from PDF")
+        text = ""
+        doc = fitz.open(stream=file_stream.read(), filetype="pdf")
+        for page in doc:
+            text += page.get_text()
+        logger.info("PDF text extraction completed")
+        return text
+    except Exception as e:
+        logger.error(f"PDF extraction error: {e}")
+        return "[PDF Extraction Error]"
 
 def extract_text_from_image_api(file):
-    response = requests.post(
-        "https://api.ocr.space/parse/image",
-        files={"file": (file.filename, file.stream, file.content_type)},
-        data={"apikey": OCR_API_KEY, "language": "eng", "OCREngine": "2"},
-    )
-    result = response.json()
-    if result.get("IsErroredOnProcessing"):
-        return "[OCR Error]"
-    return result["ParsedResults"][0]["ParsedText"]
+    try:
+        logger.info(f"Sending image to OCR API: {file.filename}")
+        response = requests.post(
+            "https://api.ocr.space/parse/image",
+            files={"file": (file.filename, file.stream, file.content_type)},
+            data={"apikey": OCR_API_KEY, "language": "eng", "OCREngine": "2"},
+        )
+        result = response.json()
+        if result.get("IsErroredOnProcessing"):
+            logger.error(f"OCR Error: {result.get('ErrorMessage')}")
+            return "[OCR Error]"
+        parsed_text = result["ParsedResults"][0]["ParsedText"]
+        logger.info("OCR text extraction completed")
+        return parsed_text
+    except Exception as e:
+        logger.error(f"OCR API call failed: {e}")
+        return "[OCR API Error]"
 
 def call_openrouter(prompt):
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        # "HTTP-Referer": "https://recurio.onrender.com",
-        "HTTP-Referer": "localhost",
-    }
+    try:
+        logger.info("Calling OpenRouter API")
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        }
 
-    data = {
-        "model": "mistralai/mistral-7b-instruct",  # fast + free
-        "messages": [
-            {"role": "user", "content": prompt}
-        ]
-    }
+        data = {
+            "model": "mistralai/mistral-7b-instruct",
+            "messages": [{"role": "user", "content": prompt}]
+        }
 
-    response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
-    if response.status_code != 200:
-        return f"<p>Error from OpenRouter: {response.status_code}<br>{response.text}</p>"
-    result = response.json()
-    return result["choices"][0]["message"]["content"]
+        response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
+
+        if response.status_code != 200:
+            logger.error(f"OpenRouter error: {response.status_code} {response.text}")
+            return f"<p>Error from OpenRouter: {response.status_code}<br>{response.text}</p>"
+
+        result = response.json()
+        logger.info("OpenRouter response received successfully")
+        return result["choices"][0]["message"]["content"]
+    except Exception as e:
+        logger.error(f"OpenRouter API call failed: {e}")
+        return "<p>OpenRouter API Error</p>"
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_files():
@@ -326,23 +352,36 @@ def upload_files():
 
     if request.method == 'POST':
         files = request.files.getlist('files')
-        for file in files:
-            filename = file.filename.lower()
-            if filename.endswith('.pdf'):
-                content = extract_text_from_pdf(file.stream)
-            elif filename.endswith(('.png', '.jpg', '.jpeg')):
-                content = extract_text_from_image_api(file)
-            else:
-                content = "[Unsupported file type]"
-            extracted_text += f"{file.filename}\n{content.strip()}\n\n"
 
-        # Build prompt
-        prompt = ( extracted_text +
+        for file in files:
+            filename = secure_filename(file.filename)
+            ext = filename.lower()
+
+            logger.info(f"Processing file: {filename}")
+
+            try:
+                if ext.endswith('.pdf'):
+                    content = extract_text_from_pdf(file.stream)
+                elif ext.endswith(('.png', '.jpg', '.jpeg')):
+                    content = extract_text_from_image_api(file)
+                else:
+                    logger.warning(f"Unsupported file type: {filename}")
+                    content = "[Unsupported file type]"
+
+                extracted_text += f"{filename}\n{content.strip()}\n\n"
+
+            except Exception as e:
+                logger.error(f"Error processing file {filename}: {e}")
+                extracted_text += f"{filename}\n[Error extracting text]\n\n"
+
+        prompt = (
+            extracted_text +
             "\n\n\nPROMPT : Here are multiple documents with their text content.\n"
             "compare all different texts, and list Similar types of questions, Repeating or duplicate questions, Commonly asked questions\n\n"
-            "Format only all that questions like this : <ol><li>question</li></ol>\n\nDo not add any other text, Only question list is required.\n\n"
-            
+            "Format only all that questions like this : <ol><li>question</li></ol>\n\n"
+            "Do not add any other text, Only question list is required.\n\n"
         )
+
         openrouter_response = call_openrouter(prompt)
 
     return render_template_string(HTML_FORM, extracted_text=extracted_text, response=openrouter_response)
