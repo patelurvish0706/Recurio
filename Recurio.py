@@ -1,14 +1,17 @@
 from flask import Flask, request, render_template_string
 import fitz  # PyMuPDF
 import requests
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get API keys
+OCR_API_KEY = os.getenv("OCR_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 app = Flask(__name__)
-
-OCR_API_KEY= "K88197236988957"
-OPENROUTER_API_KEY= "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"
-
-# Prefer to simply Enter email and confirm mail, will get api in mail https://ocr.space/ocrapi/freekey# 
-# Prefer to simply login on this site and click on *Create key* https://openrouter.ai/settings/keys
 
 HTML_FORM = '''
 <!DOCTYPE html>
