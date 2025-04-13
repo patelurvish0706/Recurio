@@ -302,7 +302,7 @@ def call_openrouter(prompt):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-
+        "HTTP-Referer": "https://recurio.onrender.com",
     }
 
     data = {
