@@ -332,7 +332,9 @@ def call_openrouter(prompt):
             "messages": [{"role": "user", "content": prompt}]
         }
 
-        response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
+        session = requests.Session()  # Create a session
+        response = session.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
+        session.close()  # Close session after request
 
         if response.status_code != 200:
             logger.error(f"OpenRouter error: {response.status_code} {response.text}")
@@ -377,8 +379,8 @@ def upload_files():
         prompt = (
             extracted_text +
             "\n\n\nPROMPT : Here are multiple documents with their text content.\n"
-            "compare all different texts, and list Similar types of questions, Repeating or duplicate questions, Commonly asked questions\n\n"
-            "Format only all that questions like this : <ol><li>question</li></ol>\n\n"
+            "compare all different texts, and list only ten question that most Repeated in multiple file.\n\n"
+            "Format only all that questions like this : <ol><li>question 1</li>...<li>question 10</li></ol>\n\n"
             "Do not add any other text, Only question list is required.\n\n"
         )
 
