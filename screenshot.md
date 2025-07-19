@@ -1,35 +1,35 @@
 # Recurio - A smart learning tool 🧾
 
-## **📸 Screenshots**
+## **📸 ScreenShots**
 ### **1. Home page of Site. 🏠**
 
 A project that find repeatative text by analysing files. Best tools for Student who can scan previous year papers and quickly find out repeative one to target/cover that first.😎🧠
 
 ---
 
-![alt text](./Screenshots/rec_home.png)
+![alt text](./ScreenShots/rec_home.png)
 
 Selecting mulitple files for input.
 
 ---
 
-![alt text](./Screenshots/rec_selFiles.png)
+![alt text](./ScreenShots/rec_selFiles.png)
 
 Processing...
 
 ---
 
-![alt text](./Screenshots/rec_inProcess.png)
+![alt text](./ScreenShots/rec_inProcess.png)
 
 Output:
 
 ---
 
-![alt text](./Screenshots/Rec_out1.png)
+![alt text](./ScreenShots/Rec_out1.png)
 
 ---
 
-![alt text](./Screenshots/Rec_out2.png)
+![alt text](./ScreenShots/Rec_out2.png)
 
 
 ### *feature*
