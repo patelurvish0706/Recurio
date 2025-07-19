@@ -1,4 +1,7 @@
 # Recurio 🤖
+
+### 📸Screenshots: [https://github.com/patelurvish0706/Recurio/blob/main/screenshot.md]
+
 **AI-based solution that analyzes multiple PDF and image files, scans them, and identifies common, repeated, and twisted versions of questions. It also suggests possible questions that may appear in upcoming exams.**
 ## 📝 Description
 
