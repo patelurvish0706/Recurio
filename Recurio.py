@@ -14,7 +14,6 @@ load_dotenv()
 OCR_API_KEY = os.getenv("OCR_API_KEY")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -328,7 +327,7 @@ def call_openrouter(prompt):
         }
 
         data = {
-            "model": "mistralai/mistral-7b-instruct",
+            "model": "mistralai/devstral-small-2505:free",
             "messages": [{"role": "user", "content": prompt}]
         }
 
